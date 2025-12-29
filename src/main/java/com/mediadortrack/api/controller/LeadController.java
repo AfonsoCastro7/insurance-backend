@@ -1,30 +1,30 @@
 package com.mediadortrack.api.controller;
 
-import com.mediadortrack.api.model.Lead;
-import com.mediadortrack.api.repository.LeadRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mediadortrack.api.dto.LeadRequestDTO;
+import com.mediadortrack.api.dto.LeadResponseDTO;
+import com.mediadortrack.api.service.LeadService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/leads")
-@CrossOrigin(origins = "*")
+@RequestMapping("/leads")
 public class LeadController {
 
-    @Autowired
-    private LeadRepository leadRepository;
+    private final LeadService leadService;
 
-    // GET /api/leads -> Devolve a lista de clientes
-    @GetMapping
-    public List<Lead> getAllLeads() {
-        return leadRepository.findAll();
+    public LeadController(LeadService leadService) {
+        this.leadService = leadService;
     }
 
-    // POST /api/leads -> Cria um cliente novo
+    @GetMapping
+    public List<LeadResponseDTO> getAllLeads() {
+        return leadService.getAll();
+    }
+
+
     @PostMapping
-    public Lead createLead(@RequestBody Lead lead) {
-        lead.setCreatedAt(java.time.LocalDateTime.now());
-        return leadRepository.save(lead);
+    public LeadResponseDTO createLead(@RequestBody LeadRequestDTO lead) {
+        return leadService.create(lead);
     }
 }

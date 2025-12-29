@@ -1,38 +1,42 @@
 package com.mediadortrack.api.controller;
 
-import com.mediadortrack.api.model.SimulationRequest;
-import com.mediadortrack.api.repository.SimulationRequestRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mediadortrack.api.dto.SimulationRequestRequestDTO;
+import com.mediadortrack.api.dto.SimulationRequestResponseDTO;
+import com.mediadortrack.api.dto.UpdateStatusDTO;
+import com.mediadortrack.api.service.SimulationRequestService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/simulations")
-@CrossOrigin(origins = "*")
+@RequestMapping("/simulations")
 public class SimulationRequestController {
 
-    @Autowired
-    private SimulationRequestRepository simulationRepository;
+    private final SimulationRequestService simulationService;
 
-    @GetMapping
-    public List<SimulationRequest> getAllSimulations() {
-        return simulationRepository.findAll();
+    public SimulationRequestController(SimulationRequestService simulationService) {
+        this.simulationService = simulationService;
     }
 
+    @GetMapping
+    public List<SimulationRequestResponseDTO> getAllSimulations() {
+        return simulationService.getAll();
+    }
 
     @PostMapping
-    public SimulationRequest createSimulation(@RequestBody SimulationRequest request) {
-        request.setCreatedAt(java.time.LocalDateTime.now());
-        return simulationRepository.save(request);
+    public SimulationRequestResponseDTO createSimulation(@RequestBody SimulationRequestRequestDTO request) {
+        return simulationService.create(request);
+    }
+
+    @PutMapping("/{id}")
+    public SimulationRequestResponseDTO updateSimulation(@PathVariable Long id,
+                                                         @RequestBody SimulationRequestRequestDTO request) {
+        return simulationService.update(id, request);
     }
 
     @PutMapping("/{id}/status")
-    public SimulationRequest updateStatus(@PathVariable Long id, @RequestBody String newStatus) {
-        return simulationRepository.findById(id).map(request -> {
-            request.setStatus(newStatus.replace("\"", "")); // Limpa aspas extra se vierem
-            request.setUpdatedAt(java.time.LocalDateTime.now());
-            return simulationRepository.save(request);
-        }).orElseThrow(() -> new RuntimeException("Pedido não encontrado!"));
+    public SimulationRequestResponseDTO updateStatus(@PathVariable Long id,
+                                                     @RequestBody UpdateStatusDTO request) {
+        return simulationService.updateStatus(id, request);
     }
 }
