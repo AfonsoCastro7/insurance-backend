@@ -16,10 +16,10 @@ public class CorsConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
+        config.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
-                "https://nextjs-boilerplate-smoky-five-46.vercel.app",
-                "https://insurance-frontend-5jgm.vercel.app"
+                "https://insurance-frontend-5jgm.vercel.app",
+                "https://insurance-frontend-*.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
