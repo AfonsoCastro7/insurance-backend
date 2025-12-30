@@ -19,7 +19,7 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "https://nextjs-boilerplate-smoky-five-46.vercel.app",
-                "https://insurance-backend-production-18c9.up.railway.app"
+                "https://insurance-frontend-5jgm.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
