@@ -5,6 +5,7 @@ import com.mediadortrack.api.dto.LoginResponseDTO;
 import com.mediadortrack.api.model.User;
 import com.mediadortrack.api.repository.UserRepository;
 import com.mediadortrack.api.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(
             @RequestBody LoginRequestDTO request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response
     ) {
         LoginResponseDTO dto = authService.login(request);
@@ -37,7 +39,7 @@ public class AuthController {
 
         String token = authService.generateToken(user);
 
-        ResponseCookie cookie = buildAuthCookie(token, 60 * 60 * 8);
+        ResponseCookie cookie = buildAuthCookie(token, 60 * 60 * 8, httpRequest);
         response.addHeader("Set-Cookie", cookie.toString());
 
         return ResponseEntity.ok(dto);
@@ -67,21 +69,29 @@ public class AuthController {
 
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-
-        ResponseCookie cookie = buildAuthCookie("", 0);
+    public ResponseEntity<Void> logout(HttpServletRequest httpRequest, HttpServletResponse response) {
+        ResponseCookie cookie = buildAuthCookie("", 0, httpRequest);
         response.addHeader("Set-Cookie", cookie.toString());
         return ResponseEntity.ok().build();
     }
 
-    private ResponseCookie buildAuthCookie(String token, long maxAgeSeconds) {
+    private ResponseCookie buildAuthCookie(String token, long maxAgeSeconds, HttpServletRequest request) {
+        boolean secure = isSecureRequest(request);
         return ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(secure)
                 .path("/")
                 .maxAge(maxAgeSeconds)
-                .sameSite("Lax")
+                .sameSite(secure ? "None" : "Lax")
                 .build();
+    }
+
+    private boolean isSecureRequest(HttpServletRequest request) {
+        String forwardedProto = request.getHeader("X-Forwarded-Proto");
+        if (forwardedProto != null) {
+            return forwardedProto.equalsIgnoreCase("https");
+        }
+        return request.isSecure();
     }
 }
 
